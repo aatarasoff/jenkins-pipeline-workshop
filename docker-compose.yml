@@ -5,7 +5,7 @@ services:
     image: jenkins:2.60.2
     ports:
       - 8080:8080
-      - 9010:9010
+      - 50000:50000
     links:
       - socatdockersock
     privileged: true
