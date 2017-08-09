@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: ikedam
+Build-Jdk: 1.6.0_45
+Extension-Name: update-sites-manager
+Specification-Title: This plugin is to manage update sites, where Jenk
+ ins accesses in order to retrieve plugins.
+Implementation-Title: update-sites-manager
+Implementation-Version: 2.0.0
+Group-Id: jp.ikedam.jenkins.plugins
+Short-Name: update-sites-manager
+Long-Name: UpdateSites Manager plugin
+Url: http://wiki.jenkins-ci.org/display/JENKINS/UpdateSites+Manager+pl
+ ugin
+Compatible-Since-Version: 2.0.0
+Plugin-Version: 2.0.0
+Hudson-Version: 1.609
+Jenkins-Version: 1.609
+Plugin-Developers: IKEDA Yasuyuki:ikedam:
+
