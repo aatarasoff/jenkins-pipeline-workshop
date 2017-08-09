@@ -57,7 +57,7 @@
               </volumes>
               <volumesFrom class="java.util.Collections$UnmodifiableRandomAccessList" resolves-to="java.util.Collections$UnmodifiableList">
                 <c class="list">
-                  <string>jenkinspipelinelivedemo_jenkins0_1</string>
+                  <string>jenkinspipelineworkshop_jenkins0_1</string>
                 </c>
                 <list reference="../c"/>
               </volumesFrom>
@@ -74,7 +74,7 @@
                 <c class="list"/>
                 <list reference="../c"/>
               </extraHosts>
-              <networkMode>container:jenkinspipelinelivedemo_jenkins0_1</networkMode>
+              <networkMode>container:jenkinspipelineworkshop_jenkins0_1</networkMode>
               <devices class="java.util.Collections$UnmodifiableRandomAccessList" resolves-to="java.util.Collections$UnmodifiableList">
                 <c class="list"/>
                 <list reference="../c"/>

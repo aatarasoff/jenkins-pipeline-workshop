@@ -1,0 +1,50 @@
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:captcha', location = '/static/bitbucket/internal/widget/captcha/captcha.less' */
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+#captcha-container {
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  width: 100%;
+  position: relative;
+}
+#captcha-image {
+  width: 230px;
+  height: 100px;
+  display: block;
+  margin: 0 auto;
+}
+.icon-reload {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: url('/s/1673131494/eb334ac/1/1.0/_/download/resources/com.atlassian.bitbucket.server.bitbucket-web:captcha/icon-refresh-16.png') no-repeat;
+  cursor: pointer;
+}
+
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:login-page', location = '/static/bitbucket/internal/page/login/login.less' */
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.user-login-embedded {
+  padding: 20px;
+}
+.user-login-embedded.bitbucket-theme {
+  min-width: 0;
+}
+.user-login-embedded form.aui:first-child {
+  width: 400px;
+  margin: 20px auto;
+}

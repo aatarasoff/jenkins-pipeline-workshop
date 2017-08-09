@@ -1,0 +1,42 @@
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:setup-tracking-widget', location = '/static/bitbucket/internal/widget/setup-tracking.js' */
+define("bitbucket/internal/widget/setup-tracking",["module","exports","jquery","lodash","bitbucket/internal/util/client-storage"],function(h,e,k,l,m){Object.defineProperty(e,"__esModule",{value:!0});var c=babelHelpers.interopRequireDefault(k),n=babelHelpers.interopRequireDefault(l),f=babelHelpers.interopRequireDefault(m),g=function(a){var b=a.isDevMode?"https://qa-wac.internal.atlassian.com":"https://www.atlassian.com",d=c.default.param({product:"stash",sid:a.serverId,pg:a.pageId,v:a.version});a=
+(0,c.default)("#setup-progress-iframe");b=b+"/pingback?"+d;a.length?a.attr("src",b):(0,c.default)("\x3ciframe\x3e").attr("id","setup-progress-iframe").css("display","none").appendTo("body").attr("src",b)};e.default={track:function(a){var b=(0,c.default)("#content"),d=b.attr("data-server-id"),b="true"===b.attr("data-dev-mode-enabled"),e=c.default.trim((0,c.default)("#product-version").text());a=a?a:window.location.pathname.replace(/\//g,"_");d={isDevMode:b,serverId:d,pageId:a,version:e};a=n.default.extend({},
+d,{pageId:"setup-complete"});f.default.setSessionItem("stash.setup.complete.data",a);g(d)},trackLoginPage:function(){var a=f.default.getSessionItem("stash.setup.complete.data");a&&(f.default.removeSessionItem("stash.setup.complete.data"),g(a))}};h.exports=e["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:captcha', location = '/static/bitbucket/internal/widget/captcha/captcha.js' */
+define("bitbucket/internal/widget/captcha/captcha",["module","exports","jquery","bitbucket/util/navbuilder"],function(b,a,c,e){Object.defineProperty(a,"__esModule",{value:!0});var d=babelHelpers.interopRequireDefault(c),f=babelHelpers.interopRequireDefault(e);a.default={initialise:function(a,b){var c=(0,d.default)(a);(0,d.default)(b).click(function(a){c.attr("src",f.default.captcha().build());return!1})}};b.exports=a["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:captcha', location = '/static/bitbucket/internal/widget/captcha/captcha.soy' */
+// This file was automatically generated from captcha.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace bitbucket.internal.widget.captcha.
+ */
+
+if (typeof bitbucket == 'undefined') { var bitbucket = {}; }
+if (typeof bitbucket.internal == 'undefined') { bitbucket.internal = {}; }
+if (typeof bitbucket.internal.widget == 'undefined') { bitbucket.internal.widget = {}; }
+if (typeof bitbucket.internal.widget.captcha == 'undefined') { bitbucket.internal.widget.captcha = {}; }
+
+
+bitbucket.internal.widget.captcha.field = function(opt_data, opt_ignored) {
+  return '' + widget.aui.form.text(soy.$$augmentMap(opt_data, {id: 'captcha', accessKey: 'a', errors: opt_data.fieldErrors ? opt_data.fieldErrors.captcha : null, required: opt_data.required, disabled: opt_data.disabled, sizeClass: 'medium'}));
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.captcha.field.soyTemplateName = 'bitbucket.internal.widget.captcha.field';
+}
+
+
+bitbucket.internal.widget.captcha.container = function(opt_data, opt_ignored) {
+  return '<div id="captcha-container"><img id="captcha-image" src="' + soy.$$escapeHtml(require('bitbucket/util/navbuilder').captcha().build()) + '" alt="' + soy.$$escapeHtml('A security CAPTCHA to prevent automated access') + '"><span id="captcha-reload" class="aui-icon icon-reload"></span></div>';
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.captcha.container.soyTemplateName = 'bitbucket.internal.widget.captcha.container';
+}
+;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:login-page', location = '/static/bitbucket/internal/page/login/login.js' */
+define("bitbucket/internal/page/login/login",["module","exports","jquery","bitbucket/internal/widget/captcha/captcha","bitbucket/internal/widget/setup-tracking"],function(c,a,d,e,f){Object.defineProperty(a,"__esModule",{value:!0});var g=babelHelpers.interopRequireDefault(d),h=babelHelpers.interopRequireDefault(e),k=babelHelpers.interopRequireDefault(f);a.default={onReady:function(){k.default.trackLoginPage();if(location.hash){var a=(0,g.default)(":input[name\x3dnext]"),b=a.val();b&&!/#/.test(b)&&
+a.val(b+location.hash)}h.default.initialise("#captcha-image","#captcha-reload")}};c.exports=a["default"]});;

@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<org.jenkinsci.plugins.ParameterizedRemoteTrigger.RemoteBuildConfiguration_-DescriptorImpl plugin="Parameterized-Remote-Trigger@2.2.2">
+  <remoteSites/>
+</org.jenkinsci.plugins.ParameterizedRemoteTrigger.RemoteBuildConfiguration_-DescriptorImpl>

@@ -1,0 +1,256 @@
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:loaded-range', location = '/static/bitbucket/internal/widget/loaded-range.js' */
+define("bitbucket/internal/widget/loaded-range",["module","exports"],function(f,c){function b(a){this.nextPageStart=this.start=void 0;this._reachedCapacity=this._reachedEnd=this._reachedStart=!1;this._capacity=a||Infinity}Object.defineProperty(c,"__esModule",{value:!0});b.prototype.isEmpty=function(){return void 0===this.start};b.prototype.isBeforeStart=function(a){return a<this.start};b.prototype.isAfterNextPageStart=function(a){return a>this.nextPageStart};b.prototype.isLoaded=function(a){return!(this.isEmpty()||
+this.isBeforeStart(a)||this.isAfterNextPageStart(a))};b.prototype.getAttachmentMethod=function(a,b){return this.isEmpty()?"html":this.isBeforeStart(a)?"prepend":"append"};b.prototype.add=function(a,b,c,d){var e=this.isEmpty();d=d||a+b;if(e||this.isBeforeStart(a))this.start=a;if(e||this.isAfterNextPageStart(d))this.nextPageStart=d;this._reachedStart=this._reachedStart||0>=a;!(this._reachedEnd=this._reachedEnd||c)&&this.nextPageStart>=this._capacity&&(this._reachedCapacity=this._reachedEnd=!0);return this};
+b.prototype.reachedStart=function(){return this._reachedStart};b.prototype.reachedEnd=function(){return this._reachedEnd};b.prototype.reachedCapacity=function(){return this._reachedCapacity};b.prototype.pageBefore=function(a){if(this.reachedStart())return null;a=Math.max(0,this.start-a);return{start:a,limit:this.start-a}};b.prototype.pageAfter=function(a){return this.reachedEnd()?null:{start:this.nextPageStart,limit:a}};c.default=b;f.exports=c["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:paged-scrollable', location = '/static/bitbucket/internal/widget/paged-scrollable.js' */
+define("bitbucket/internal/widget/paged-scrollable","module exports aui jquery lodash bitbucket/internal/util/events bitbucket/internal/util/function bitbucket/internal/util/navigator bitbucket/internal/widget/loaded-range".split(" "),function(q,g,h,r,t,u,v,w,x){function b(a,k){this.options=d.default.extend({},b.defaults,k);this.$scrollElement=(0,d.default)(a||window);if(d.default.isWindow(this.$scrollElement[0])){var c=window.document.documentElement;this.getPaneHeight=function(){return c.clientHeight};
+this.getContentHeight=function(){return c.scrollHeight}}this._eventHandlers=[]}function l(a,b,c){if(a.currentXHR)return d.default.Deferred().reject();a.currentXHR=a.requestData(b,c);return a.currentXHR.always(function(){a.currentXHR=null}).done(function(e){!a.loadedRange.isEmpty()&&a.options.paginationContext&&m.default.trigger("bitbucket.internal.ui.nav.pagination",null,{context:a.options.paginationContext,page:(e.start||b)/(e.limit||c)+1});a.onDataLoaded(b,c,e)}).fail(function(){a.suspend()})}Object.defineProperty(g,
+"__esModule",{value:!0});var y=babelHelpers.interopRequireDefault(h),d=babelHelpers.interopRequireDefault(r),f=babelHelpers.interopRequireDefault(t),m=babelHelpers.interopRequireDefault(u),n=babelHelpers.interopRequireDefault(v);h=babelHelpers.interopRequireDefault(w);var z=babelHelpers.interopRequireDefault(x),p=h.default.isIE();b.defaults={pageSize:50,scrollDelay:250,bufferPixels:0,precedingSpaceMaintained:!0,suspendOnFailure:!0,dataLoadedEvent:"bitbucket.internal.widget.pagedscrollable.dataLoaded",
+autoLoad:!0,preventOverscroll:!1,idForEntity:null,paginationContext:null};b.prototype.init=function(a){b.prototype.reset.call(this);a=a||{};this.loadedRange=a.loadedRange||new z.default;var k=this,c=this.options.pageSize,e=a.targetedItem?Math.floor(a.targetedItem/c)*c:0;a.suspended&&this.suspend();return this.loadedRange.isLoaded(e)?(this.loadIfRequired()||d.default.Deferred().resolve()).done(function(){k.onFirstDataLoaded()}):l(this,e,c).then(void 0,function(){return 0!==e?l(k,0,c):d.default.Deferred().rejectWith(this,
+arguments)}).fail(function(a,b,c,e){e&&e.errors&&e.errors.length&&k.handleErrors(e.errors)})};b.prototype.reset=function(){this.currentXHR&&this.cancelRequest();this.clearListeners();this._resizeHandler&&((0,d.default)(window).off("resize",this._resizeHandler),this._resizeHandler=null);this.options.idForEntity&&(this._ids={});this._suspended=!1};b.prototype.destroy=function(){this.reset();delete this.$scrollElement};b.prototype.suspend=function(){this._suspended=!0};b.prototype.resume=function(){this._suspended=
+!1;return this.loadIfRequired()};b.prototype.isSuspended=function(){return this._suspended};b.prototype.getScrollTop=function(){return this.$scrollElement.scrollTop()};b.prototype.setScrollTop=function(a){this.$scrollElement.scrollTop(a)};b.prototype.getPane=function(){return this.$scrollElement};b.prototype.getPaneHeight=function(){return this.$scrollElement[0].clientHeight};b.prototype.getContentHeight=function(){return this.$scrollElement[0].scrollHeight};b.prototype.getOption=function(a){if(Object.prototype.hasOwnProperty.call(this.options,
+a))return this.options[a]};b.prototype.setOptions=function(a){d.default.isPlainObject(a)&&(this.options=d.default.extend(this.options,a))};b.prototype.addScrollListener=function(a){a=this.scrollDelay?f.default.debounce(a,this.scrollDelay):a;this._eventHandlers.push(a);this.$scrollElement.on("scroll.paged-scrollable",a)};b.prototype._bindOverscrollPrevention=function(){function a(a,b){var e=this.scrollHeight-(0,d.default)(this).outerHeight()-1,f=0>b||isNaN(b),A=0<b||isNaN(b);(this.scrollTop>e&&f||
+1>this.scrollTop&&A)&&a.preventDefault()}this._eventHandlers.push(a);this.$scrollElement.on("mousewheel.paged-scrollable",a)};b.prototype.clearListeners=function(){var a=this;f.default.each(this._eventHandlers,function(b){a.$scrollElement.unbind(".paged-scrollable",b)});this._eventHandlers.length=0};b.prototype.loadIfRequired=function(){if(!(this.isSuspended()||this.loadedRange.reachedEnd()&&this.loadedRange.reachedStart())){var a=this.getScrollTop(),b=this.getPaneHeight(),c=this.getContentHeight(),
+b=b+a;if(d.default.isWindow(this.getPane()[0])||!this.getPane().is(":hidden")){if(f.default.any([!0,"previous"],n.default.eq(this.options.autoLoad))&&a<this.options.bufferPixels+this.loadedRange.start/this.loadedRange.nextPageStart*c&&(a=this.loadedRange.pageBefore(this.options.pageSize)))return this.load(a.start,a.limit);if(f.default.any([!0,"next"],n.default.eq(this.options.autoLoad))&&b+1>=c-this.options.bufferPixels&&(c=this.loadedRange.pageAfter(this.options.pageSize)))return this.load(c.start,
+c.limit)}}};b.prototype.load=function(a,b){var c=this;return l(this,a,b).fail(function(a,b,k,d){d&&d.errors&&c.handleErrors(d.errors)})};b.prototype.loadAfter=function(){var a=this.loadedRange.pageAfter(this.options.pageSize);return a&&this.load(a.start,a.limit)};b.prototype.loadBefore=function(){var a=this.loadedRange.pageBefore(this.options.pageSize);return a&&this.load(a.start,a.limit)};b.prototype.onDataLoaded=function(a,b,c){void 0!==c.start&&(a=c.start);var e=this.loadedRange.isEmpty(),d=this.loadedRange.getAttachmentMethod(a,
+c.size),f="prepend"===d;this.loadedRange.add(a,c.size,c.isLastPage,c.nextPageStart);var g,h;if(f||p)h=this.getScrollTop(),g=this.getContentHeight();c=this._addPage(c,d);if(f||p)d=f?this.getContentHeight()-g:0,this.setScrollTop(h+d);if(e)this.onFirstDataLoaded(a,b,c);m.default.trigger(this.options.dataLoadedEvent,this,a,b,c);this.loadIfRequired()};b.prototype._addPage=function(a,b){a=this._dedupe(a);this.attachNewContent(a,b);return a};b.prototype._dedupe=function(a){if(a&&a.values&&this.options.idForEntity){var b=
+this._ids,c=this.options.idForEntity;a=d.default.extend({},a,{values:f.default.filter(a.values,function(a){a=c(a);return f.default.has(b,a)?!1:b[a]=!0})})}return a};b.prototype.onFirstDataLoaded=function(){var a=this;this.addScrollListener(function(){a.loadIfRequired()});this.options.preventOverscroll&&this._bindOverscrollPrevention();(0,d.default)(window).on("resize",this._resizeHandler=function(){a.loadIfRequired()})};b.prototype.cancelRequest=function(){this.currentXHR&&(this.currentXHR.abort?
+this.currentXHR.abort():this.currentXHR.reject?this.currentXHR.reject():y.default.log("Couldn't cancel the current request."),this.currentXHR=null)};b.prototype.add=function(a,b){return a.length?(this._addPage({values:a,size:a.length},b||"prepend"),!0):!1};b.prototype.remove=function(a){return this.options.idForEntity&&(a=this.options.idForEntity(a),f.default.has(this._ids,a))?(delete this._ids[a],"number"===typeof this.loadedRange.nextPageStart&&(this.loadedRange.nextPageStart=Math.max(0,this.loadedRange.nextPageStart-
+1)),!0):!1};b.prototype.attachNewContent=function(a,b){throw Error("attachNewContent is abstract and must be implemented.");};b.prototype.requestData=function(a,b){throw Error("requestData is abstract and must be implemented.  It must return a promise. It is preferred to return a jqXHR.");};b.prototype.handleErrors=function(a){throw Error("handleErrors is abstract and must be implemented.");};g.default=b;q.exports=g["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:paged-table', location = '/static/bitbucket/internal/widget/paged-table/paged-table.soy' */
+// This file was automatically generated from paged-table.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace bitbucket.internal.widget.
+ */
+
+if (typeof bitbucket == 'undefined') { var bitbucket = {}; }
+if (typeof bitbucket.internal == 'undefined') { bitbucket.internal = {}; }
+if (typeof bitbucket.internal.widget == 'undefined') { bitbucket.internal.widget = {}; }
+
+
+bitbucket.internal.widget.pagedTable = function(opt_data, opt_ignored) {
+  var output = '' + ((opt_data.filterable) ? bitbucket.internal.widget.pagedTableFilter({forId: opt_data.id, filter: opt_data.filter, filterPlaceholder: opt_data.filterPlaceholder}) : '');
+  var pageAttributes__soy9 = opt_data.page ? atl_soy.concat({start: opt_data.page.start, size: opt_data.page.size, lastpage: opt_data.page.isLastPage}, opt_data.page.nextPageRequest ? {nextpagestart: opt_data.page.nextPageRequest.start} : {}) : {};
+  output += widget.aui.table({id: opt_data.id, dataAttributes: atl_soy.concat(pageAttributes__soy9, opt_data.extraDataAttributes ? opt_data.extraDataAttributes : {}), extraClasses: 'paged-table' + ((opt_data.extraClasses) ? ' ' + soy.$$escapeHtml(opt_data.extraClasses) : '') + ((! opt_data.page || opt_data.page.size == 0) ? ' no-rows' : ''), theadContent: opt_data.theadContent, content: opt_data.content}) + ((opt_data.page && opt_data.page.size == 0) ? bitbucket.internal.widget.pagedTableMessage({content: opt_data.filterable && opt_data.filter ? (opt_data.noneMatchingMessageContent ? opt_data.noneMatchingMessageContent : '') : opt_data.noneFoundMessageContent ? opt_data.noneFoundMessageContent : ''}) : '');
+  return output;
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.pagedTable.soyTemplateName = 'bitbucket.internal.widget.pagedTable';
+}
+
+
+bitbucket.internal.widget.pagedTableMessage = function(opt_data, opt_ignored) {
+  return '<div class="paged-table-message">' + soy.$$filterNoAutoescape(opt_data.content) + '</div>';
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.pagedTableMessage.soyTemplateName = 'bitbucket.internal.widget.pagedTableMessage';
+}
+
+
+bitbucket.internal.widget.pagedTableFilter = function(opt_data, opt_ignored) {
+  return '' + aui.group.group({extraClasses: 'paged-table-filter', content: '' + aui.group.item({content: '' + bitbucket.internal.widget.pagedTableFilterField(opt_data)})});
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.pagedTableFilter.soyTemplateName = 'bitbucket.internal.widget.pagedTableFilter';
+}
+
+
+bitbucket.internal.widget.pagedTableFilterField = function(opt_data, opt_ignored) {
+  return '<label class="assistive" for="paged-table-input-for-' + soy.$$escapeHtml(opt_data.forId) + '">' + soy.$$escapeHtml(opt_data.filterPlaceholder ? opt_data.filterPlaceholder : 'Find') + '</label><input type="text" id="paged-table-input-for-' + soy.$$escapeHtml(opt_data.forId) + '" class="paged-table-filter-input" data-for="' + soy.$$escapeHtml(opt_data.forId) + '" autocomplete="off" placeholder="' + soy.$$escapeHtml(opt_data.filterPlaceholder ? opt_data.filterPlaceholder : 'Find') + '" value="' + soy.$$escapeHtml(opt_data.filter ? opt_data.filter : '') + '">';
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.pagedTableFilterField.soyTemplateName = 'bitbucket.internal.widget.pagedTableFilterField';
+}
+;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:paged-table', location = '/static/bitbucket/internal/widget/paged-table/paged-table.js' */
+define("bitbucket/internal/widget/paged-table/paged-table","module exports aui jquery lodash bitbucket/internal/util/ajax bitbucket/internal/widget/error-dialog/error-dialog bitbucket/internal/widget/paged-scrollable".split(" "),function(l,g,m,n,p,q,r,t){function b(a){a=d.default.extend(!0,{},b.defaults,a);e.default.call(this,a.scrollPaneSelector,a);this.$table=(0,d.default)(a.target);if(a.filterable){this.$filter=a.filter?(0,d.default)(a.filter):this.$table.prev(".paged-table-filter").find(".paged-table-filter-input");
+this._currentFilterText=d.default.trim(this.$filter.val());var h=f.default.debounce(f.default.bind(this._onFilterChanged,this),a.filterDebounce);this.$filter.on("keyup.paged-table-filter",function(a){a.which===k.default.keyCode.ESCAPE?(0,d.default)(this).blur():h(a)}).on("paste.paged-table-filter",h)}this.$spinner=(0,d.default)("\x3cdiv class\x3d'spinner'/\x3e").hide().insertAfter(this.$table);this.spinnerShowing=!1;this.processedDomData=null==this.$table.attr("data-lastpage")}Object.defineProperty(g,
+"__esModule",{value:!0});var k=babelHelpers.interopRequireDefault(m),d=babelHelpers.interopRequireDefault(n),f=babelHelpers.interopRequireDefault(p),u=babelHelpers.interopRequireDefault(q),v=babelHelpers.interopRequireDefault(r),e=babelHelpers.interopRequireDefault(t);b.defaults={ajaxDataType:"json",spinnerSize:"large",filterable:!1,bufferPixels:150,filterDebounce:350,rowSelector:"\x3e tbody \x3e tr",focusOptions:{escToCancel:!1,focusedClass:"focused",rowSelector:"\x3e tbody \x3e tr",wrapAround:!1}};
+d.default.extend(b.prototype,e.default.prototype);b.prototype.init=function(){return e.default.prototype.init.apply(this,arguments).done(f.default.bind(function(){this.shortcutsInitialised&&this.focusInitialRow()},this))};b.prototype.getFilterText=function(){return this._currentFilterText};b.prototype._onFilterChanged=function(){var a=d.default.trim(this.$filter.val());this._currentFilterText!==a&&(this._currentFilterText=a,this.update())};b.prototype.requestData=function(a,b){if(!this.processedDomData)return d.default.Deferred().resolve(this.createDataFromJQuery(a,
+b,this.$table));var c=this;c.spinnerShowing=!0;c.$spinner.show().spin(c.options.spinnerSize,{zIndex:10});return c.performAjax(a,b).always(function(){c._hideSpinnerTimeout=setTimeout(function(){c.spinnerShowing&&c.$spinner.spinStop().hide();c.spinnerShowing=!1},0)})};b.prototype.performAjax=function(a,b){return u.default.ajax({url:this.buildUrl(a,b,this.getFilterText()),dataType:this.options.ajaxDataType,statusCode:this.options.statusCode})};b.prototype.cancelRequest=function(){e.default.prototype.cancelRequest.call(this);
+this._hideSpinnerTimeout&&clearTimeout(this._hideSpinnerTimeout)};b.prototype.reset=function(){e.default.prototype.reset.call(this);this.processedDomData&&this.$table.find(this.options.rowSelector).remove().end().next(".paged-table-message").remove().end();this.$table.addClass("no-rows")};b.prototype.update=function(a){this.reset();return this.init(a)};b.prototype.createDataFromJQuery=function(a,b,c){b=c.find(this.options.rowSelector);var d="true"===c.attr("data-lastpage");a=c.attr("data-nextpagestart");
+c={start:Number(c.attr("data-start")),size:Number(c.attr("data-size")),values:b,isLastPage:d};null!=a&&(c.nextPageStart=Number(a));return c};b.prototype.attachNewContent=function(a,b){if(a.size){if(this.processedDomData){if(a&&a.errors){this.handleErrors(a.errors);return}this.handleNewRows(a,b)}0<a.start&&a.isLastPage&&this.handleLastPage();this.$table.removeClass("no-rows")}else a.isLastPage&&this.handleNoData();this.updateTimestamp();this.processedDomData=!0};b.prototype.updateTimestamp=function(){this.$table.attr("data-last-updated",
+(new Date).getTime())};b.prototype.focusInitialRow=function(){this.$table.find(this.options.focusOptions.rowSelector).first().addClass(this.options.focusOptions.focusedClass)};b.prototype.initShortcuts=function(){this.shortcutsInitialised=!0;this.focusInitialRow();return{destroy:f.default.bind(this.resetShortcuts,this)}};b.prototype.resetShortcuts=function(){this.shortcutsInitialised=!1};b.prototype._new$Message=function(a){return(0,d.default)('\x3cdiv class\x3d"paged-table-message"/\x3e').addClass(this.options.tableMessageClass).html(a||
+"")};b.prototype.handleLastPage=function(){this.$table.after(this._new$Message(this.options.allFetchedMessageHtml))};b.prototype.handleNoData=function(){var a=this.getFilterText(),a=a&&a.length?this.options.noneMatchingMessageHtml:this.options.noneFoundMessageHtml;this.$table.addClass("no-rows").after(this._new$Message(a))};b.prototype.handleErrors=function(a){(new v.default({panelContent:"\x3cp\x3e"+k.default.escapeHtml(a[0].message)+"\x3c/p\x3e"})).show()};b.prototype.buildUrl=function(a,b,c){throw Error("buildUrl is abstract and must be implemented.");
+};b.prototype.handleNewRows=function(a,b){throw Error("handleNewRows is abstract and must be implemented.");};g.default=b;l.exports=g["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:time', location = '/static/bitbucket/internal/widget/date/time.soy' */
+// This file was automatically generated from time.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace bitbucket.internal.widget.date.
+ */
+
+if (typeof bitbucket == 'undefined') { var bitbucket = {}; }
+if (typeof bitbucket.internal == 'undefined') { bitbucket.internal = {}; }
+if (typeof bitbucket.internal.widget == 'undefined') { bitbucket.internal.widget = {}; }
+if (typeof bitbucket.internal.widget.date == 'undefined') { bitbucket.internal.widget.date = {}; }
+
+
+bitbucket.internal.widget.date.customAge = function(opt_data, opt_ignored) {
+  return '' + bitbucket.internal.widget.date.time({date: opt_data.date, title: opt_data.title, customMapping: opt_data.customMapping, extraClasses: opt_data.extraClasses, type: 'shortAge'});
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.date.customAge.soyTemplateName = 'bitbucket.internal.widget.date.customAge';
+}
+
+
+bitbucket.internal.widget.date.shortAge = function(opt_data, opt_ignored) {
+  return '' + bitbucket.internal.widget.date.time({date: opt_data.date, title: opt_data.title, extraClasses: opt_data.extraClasses, type: 'shortAge'});
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.date.shortAge.soyTemplateName = 'bitbucket.internal.widget.date.shortAge';
+}
+
+
+bitbucket.internal.widget.date.short = function(opt_data, opt_ignored) {
+  return '' + bitbucket.internal.widget.date.time({date: opt_data.date, title: opt_data.title, extraClasses: opt_data.extraClasses, type: 'short'});
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.date.short.soyTemplateName = 'bitbucket.internal.widget.date.short';
+}
+
+
+bitbucket.internal.widget.date.time = function(opt_data, opt_ignored) {
+  return '' + ((opt_data.date) ? '<time title="' + soy.$$escapeHtml(opt_data.title ? opt_data.title : require('bitbucket/internal/util/time').format(opt_data.date, 'full')) + '" datetime="' + soy.$$escapeHtml(require('bitbucket/internal/util/time').format(opt_data.date, 'timestamp')) + '"' + ((opt_data.extraClasses) ? ' class="' + soy.$$escapeHtml(opt_data.extraClasses) + '"' : '') + '>' + soy.$$escapeHtml(require('bitbucket/internal/util/time').format(opt_data.date, opt_data.type, opt_data.customMapping)) + '</time>' : '<time' + ((opt_data.extraClasses) ? ' class="' + soy.$$escapeHtml(opt_data.extraClasses) + '"' : '') + '>' + soy.$$escapeHtml('Unknown Date') + '</time>');
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.date.time.soyTemplateName = 'bitbucket.internal.widget.date.time';
+}
+;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:time', location = '/static/bitbucket/internal/widget/date/deprecated-time.soy' */
+// This file was automatically generated from deprecated-time.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace widget.date.
+ */
+
+if (typeof widget == 'undefined') { var widget = {}; }
+if (typeof widget.date == 'undefined') { widget.date = {}; }
+
+
+widget.date.shortAge = function(opt_data, opt_ignored) {
+  return '' + widget.date.time({date: opt_data.date, title: opt_data.title, extraClasses: opt_data.extraClasses, type: 'shortAge'});
+};
+if (goog.DEBUG) {
+  widget.date.shortAge.soyTemplateName = 'widget.date.shortAge';
+}
+
+
+widget.date.short = function(opt_data, opt_ignored) {
+  return '' + widget.date.time({date: opt_data.date, title: opt_data.title, extraClasses: opt_data.extraClasses, type: 'short'});
+};
+if (goog.DEBUG) {
+  widget.date.short.soyTemplateName = 'widget.date.short';
+}
+
+
+widget.date.time = function(opt_data, opt_ignored) {
+  return '' + ((opt_data.date) ? '<time title="' + soy.$$escapeHtml(opt_data.title ? opt_data.title : require('bitbucket/internal/util/time').format(opt_data.date, 'full')) + '" datetime="' + soy.$$escapeHtml(require('bitbucket/internal/util/time').format(opt_data.date, 'timestamp')) + '" class="deprecated' + ((opt_data.extraClasses) ? ' ' + soy.$$escapeHtml(opt_data.extraClasses) : '') + '">' + soy.$$escapeHtml(require('bitbucket/internal/util/time').format(opt_data.date, opt_data.type)) + '</time>' : '<time class="deprecated' + ((opt_data.extraClasses) ? ' ' + soy.$$escapeHtml(opt_data.extraClasses) : '') + '">' + soy.$$escapeHtml('Unknown Date') + '</time>');
+};
+if (goog.DEBUG) {
+  widget.date.time.soyTemplateName = 'widget.date.time';
+}
+;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:user-table', location = '/static/bitbucket/internal/feature/user/user-table/user-table.js' */
+define("bitbucket/internal/feature/user/user-table/user-table","module exports aui jquery bitbucket/util/navbuilder bitbucket/internal/widget/paged-table/paged-table".split(" "),function(g,d,h,k,l,m){function c(b){e.default.call(this,f.default.extend({filterable:!0,noneMatchingMessageHtml:a.default.escapeHtml("No users matching users found"),noneFoundMessageHtml:a.default.escapeHtml("No users"),paginationContext:"user-table"},
+b))}Object.defineProperty(d,"__esModule",{value:!0});var a=babelHelpers.interopRequireDefault(h),f=babelHelpers.interopRequireDefault(k),n=babelHelpers.interopRequireDefault(l),e=babelHelpers.interopRequireDefault(m);f.default.extend(c.prototype,e.default.prototype);c.prototype.buildUrl=function(b,c,a){b={start:b,limit:c,avatarSize:bitbucket.internal.widget.avatarSizeInPx({size:"small"})};a&&(b.filter=a);return n.default.admin().users().withParams(b).build()};c.prototype.handleNewRows=function(b,
+a){this.$table.find("tbody")[a](bitbucket.internal.feature.user.userRows({users:b.values}))};d.default=c;g.exports=d["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:user-table', location = '/static/bitbucket/internal/feature/user/user-table/user-table.soy' */
+// This file was automatically generated from user-table.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace bitbucket.internal.feature.user.
+ */
+
+if (typeof bitbucket == 'undefined') { var bitbucket = {}; }
+if (typeof bitbucket.internal == 'undefined') { bitbucket.internal = {}; }
+if (typeof bitbucket.internal.feature == 'undefined') { bitbucket.internal.feature = {}; }
+if (typeof bitbucket.internal.feature.user == 'undefined') { bitbucket.internal.feature.user = {}; }
+
+
+bitbucket.internal.feature.user.userTable = function(opt_data, opt_ignored) {
+  return '' + bitbucket.internal.widget.pagedTable(soy.$$augmentMap(opt_data, {id: opt_data.id, page: opt_data.page, filterable: true, extraClasses: 'user-table', theadContent: '<tr><th id="fullname" scope="col">' + soy.$$escapeHtml('Name') + '</th><th id="username" scope="col">' + soy.$$escapeHtml('Username') + '</th><th id="email" scope="col">' + soy.$$escapeHtml('Email') + '</th><th id="directory" scope="col">' + soy.$$escapeHtml('Directory') + '</th><th id="lastAuthenticated" scope="col">' + soy.$$escapeHtml('Last authenticated') + '</th><th id="actions" scope="col"></th></tr>', content: '' + ((opt_data.page.size) ? bitbucket.internal.feature.user.userRows({users: opt_data.page.values}) : ''), noneMatchingMessageContent: '' + soy.$$escapeHtml('No users matching users found'), noneFoundMessageContent: '' + soy.$$escapeHtml('No users')}));
+};
+if (goog.DEBUG) {
+  bitbucket.internal.feature.user.userTable.soyTemplateName = 'bitbucket.internal.feature.user.userTable';
+}
+
+
+bitbucket.internal.feature.user.userRows = function(opt_data, opt_ignored) {
+  var output = '';
+  var userList30 = opt_data.users;
+  var userListLen30 = userList30.length;
+  for (var userIndex30 = 0; userIndex30 < userListLen30; userIndex30++) {
+    var userData30 = userList30[userIndex30];
+    output += bitbucket.internal.feature.user.userRow({user: userData30});
+  }
+  return output;
+};
+if (goog.DEBUG) {
+  bitbucket.internal.feature.user.userRows.soyTemplateName = 'bitbucket.internal.feature.user.userRows';
+}
+
+
+bitbucket.internal.feature.user.userRow = function(opt_data, opt_ignored) {
+  return '<tr><td headers="fullname">' + bitbucket.internal.widget.avatarWithName({size: 'small', person: opt_data.user, link: true, href: require('bitbucket/util/navbuilder').admin().users().view(opt_data.user.name).build()}) + '</td><td headers="username" title="' + soy.$$escapeHtml(opt_data.user.name) + '"><div>' + soy.$$escapeHtml(opt_data.user.name) + '</div></td><td headers="email" ' + ((! opt_data.user.emailAddress) ? 'class="empty-field"' : '') + '><div>' + soy.$$escapeHtml(opt_data.user.emailAddress ? opt_data.user.emailAddress : 'None') + '</div></td><td headers="directory">' + soy.$$escapeHtml(opt_data.user.directoryName) + '</td><td headers="lastAuthenticated" ' + ((! opt_data.user.lastAuthenticationTimestamp) ? 'class="empty-field"' : '') + '><div>' + ((opt_data.user.lastAuthenticationTimestamp) ? bitbucket.internal.widget.date.shortAge({date: opt_data.user.lastAuthenticationTimestamp}) : soy.$$escapeHtml('Unknown')) + '</div></td><td headers="actions">' + ((opt_data.user.deletable) ? bitbucket.internal.buttons.deleteButton({href: require('bitbucket/util/navbuilder').admin().users().deleteUser(opt_data.user.name).build(), extraAttributes: {'data-for': opt_data.user.displayName}, extraClasses: 'delete-user', title: 'Delete'}) : '') + '</td></tr>';
+};
+if (goog.DEBUG) {
+  bitbucket.internal.feature.user.userRow.soyTemplateName = 'bitbucket.internal.feature.user.userRow';
+}
+;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:submit-spinner', location = '/static/bitbucket/internal/widget/submit-spinner/submit-spinner.js' */
+define("bitbucket/internal/widget/submit-spinner/submit-spinner",["module","exports","jquery"],function(c,a,e){function b(a,c){if(!(this instanceof b))return new b(a);this.$button=(0,d.default)(a);this.$spinner=(0,d.default)('\x3cdiv class\x3d"submit-spinner invisible" /\x3e');"before"===c?this.$spinner.insertBefore(this.$button):this.$spinner.insertAfter(this.$button)}Object.defineProperty(a,"__esModule",{value:!0});var d=babelHelpers.interopRequireDefault(e);b.prototype.show=function(){this.$spinner.removeClass("invisible");
+this.$spinner.spin();return this};b.prototype.hide=function(){this.$spinner.addClass("invisible");this.$spinner.spinStop();return this};b.prototype.remove=function(){this.$spinner.remove();return this};a.default=b;c.exports=a["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:confirm-dialog', location = '/static/bitbucket/internal/widget/confirm-dialog.js' */
+define("bitbucket/internal/widget/confirm-dialog","module exports aui jquery lodash bitbucket/internal/util/ajax bitbucket/internal/widget/submit-spinner/submit-spinner".split(" "),function(l,c,m,n,r,t,u){function a(b,v){this.dialogOptions=e.default.extend({},a.dialogDefaults,b);this.ajaxOptions=v||{};this._selectors=[];this._okCallbacks=e.default.Callbacks();this._cancelCallback=e.default.Callbacks();this._detachers=e.default.Callbacks();this._attached=!1}Object.defineProperty(c,"__esModule",{value:!0});
+var g=babelHelpers.interopRequireDefault(m),e=babelHelpers.interopRequireDefault(n),w=babelHelpers.interopRequireDefault(r),x=babelHelpers.interopRequireDefault(t),y=babelHelpers.interopRequireDefault(u);a.prototype.getConfirmButton=function(){return(0,e.default)("#"+this.dialogOptions.id+" ."+this.dialogOptions.confirmButtonClass)};a.prototype.getButtons=function(){var b=this.getConfirmButton(),a=this.dialogOptions.id;w.default.each(this._selectors,function(g){b=b.add((0,e.default)("#"+a+" "+g))});
+return b};a.prototype.setButtonsDisabled=function(b){this.getButtons().each(function(){var a=(0,e.default)(this);a.prop("disabled",b).toggleClass("disabled",b);b?a.attr("aria-disabled","true"):a.removeAttr("aria-disabled")})};a.prototype.destroy=function(){this._detachers.fire();this._detachers=null};a.prototype.attachTo=function(b,a,c){var h=this,d=this.dialogOptions,l=this.ajaxOptions,m=this._okCallbacks,n=this._cancelCallback;c=c||document;var f=(0,e.default)(c);this._selectors.push(b);var p=function(){h.setButtonsDisabled(!1)};
+f.on("hideLayer",p);var q=function(b){b.preventDefault();var c=(0,e.default)(this);if(!c.is(":disabled")){var f=function(a){h.setButtonsDisabled(!1);a.remove()},k=new g.default.Dialog({width:d.width,height:d.height,id:d.id,focusSelector:d.focusSelector,closeOnOutsideClick:!1,keypressListener:function(a){a.stopImmediatePropagation();a.keyCode===g.default.keyCode.ESCAPE&&(a.preventDefault(),f(k))}});k.addHeader(d.titleText,d.titleClass);k.addPanel("",d.panelContent,d.panelClass);k.addButton(d.submitText,
+function(a){h.setButtonsDisabled(!0);var b=null,d=new y.default(h.getConfirmButton(),"before");h.dialogOptions.submitToHref&&(d.show(),"A"===c[0].tagName?b=x.default.rest(e.default.extend({url:c.attr("href")},l)).always(function(){d.hide();f(a)}):c.closest("form")[0].submit());m.fire(b,c,function(){f(a)},a,d)},"button "+(d.confirmButtonClass||""));k.addCancel("Cancel",function(a){f(a);n.fire(c)});a&&a(this,k,h);k.show();h._attached=!0}};f.on("click",b,
+q);this._detachers.add(function(){f.off("hideLayer",p);f.off("click",b,q)})};a.prototype.addConfirmListener=function(a){this._okCallbacks.add(a)};a.prototype.addCancelListener=function(a){this._cancelCallback.add(a)};a.dialogDefaults={id:void 0,titleText:"Confirm",titleClass:"confirm-header",confirmButtonClass:"confirm-button",panelContent:"\x3cp\x3e"+"Are you sure you want to do that?"+"\x3c/p\x3e",panelClass:"panel-body",submitText:"Confirm",
+submitToHref:!0,height:230,width:433,focusSelector:".confirm-button"};c.default=a;l.exports=c["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:delete-dialog', location = '/static/bitbucket/internal/widget/delete-dialog/delete-dialog.soy' */
+// This file was automatically generated from delete-dialog.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace bitbucket.internal.widget.
+ */
+
+if (typeof bitbucket == 'undefined') { var bitbucket = {}; }
+if (typeof bitbucket.internal == 'undefined') { bitbucket.internal = {}; }
+if (typeof bitbucket.internal.widget == 'undefined') { bitbucket.internal.widget = {}; }
+
+
+bitbucket.internal.widget.deleteDialog = function(opt_data, opt_ignored) {
+  return '<p>' + soy.$$filterNoAutoescape(AJS.format('Are you sure that you want to delete {0}{1}{2}?','<b class="display-name">','','</b>')) + '</p>';
+};
+if (goog.DEBUG) {
+  bitbucket.internal.widget.deleteDialog.soyTemplateName = 'bitbucket.internal.widget.deleteDialog';
+}
+;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:delete-dialog', location = '/static/bitbucket/internal/widget/delete-dialog/delete-dialog.js' */
+define("bitbucket/internal/widget/delete-dialog/delete-dialog",["module","exports","aui","jquery","bitbucket/internal/widget/confirm-dialog"],function(e,b,f,n,p){Object.defineProperty(b,"__esModule",{value:!0});var g=babelHelpers.interopRequireDefault(f),k=babelHelpers.interopRequireDefault(n),q=babelHelpers.interopRequireDefault(p);b.default={bind:function(b,c,e,f,l,m){c=new q.default({id:"delete-dialog",titleClass:"warning-header",titleText:c,panelContent:bitbucket.internal.widget.deleteDialog(),
+submitText:"Delete",focusSelector:".button-panel-cancel-link"},{type:"DELETE",statusCode:{"*":!1}});var h=function(b){(0,k.default)("#content .aui-page-panel .notifications").empty().html(b)};c.addConfirmListener(function(b,c){b.done(function(a){a=a?a.displayName?a.displayName:a.name?a.name:"":"";var b=e.replace("{0}",g.default.escapeHtml(a));(a=!l||l(a,c))&&!a.promise?h(aui.message.success({content:b})):a&&a.promise&&a.done(function(){h(aui.message.success({content:b}))})}).fail(function(a,
+b,c,d){a=g.default.escapeHtml(d&&d.errors&&d.errors[0]&&d.errors[0].message?d.errors[0].message:f);h(aui.message.error({content:a}))})});c.attachTo(b,function(b,c){var a=m?m():(0,k.default)(b).data("for");c.getPanel(0).body.find(".display-name").text(a)})}};e.exports=b["default"]});;
+;
+/* module-key = 'com.atlassian.bitbucket.server.bitbucket-web:admin-userlist-page', location = '/static/bitbucket/internal/page/admin/users/userlist.js' */
+define("bitbucket/internal/page/admin/users/userlist","module exports aui bitbucket/internal/feature/user/user-table/user-table bitbucket/internal/util/notifications/notifications bitbucket/internal/widget/delete-dialog/delete-dialog".split(" "),function(c,a,e,f,g,h){Object.defineProperty(a,"__esModule",{value:!0});var b=babelHelpers.interopRequireDefault(e),k=babelHelpers.interopRequireDefault(f),d=babelHelpers.interopRequireDefault(g),l=babelHelpers.interopRequireDefault(h);a.default={onReady:function(a,
+c){d.default.showFlashes();(new k.default({target:a})).init();l.default.bind(c,"Delete user","The user {0} was successfully deleted.","The user could not be deleted.",function(a){d.default.addFlash(b.default.format("The user {0} was successfully deleted.",a));location.reload()})}};c.exports=a["default"]});;
