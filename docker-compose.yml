@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  jenkins0:
+    image: jenkins:2.60.2
+    ports:
+      - 8080:8080
+      - 9010:9010
+    links:
+      - socatdockersock
+    privileged: true
+    volumes:
+      - ./.jenkins0:/var/jenkins_home
+      - ./.jenkins-backup:/var/jenkins_backup
+      - ./.jenkins-workspace:/home/jenkins
+      - ./.jenkins-workspace/.jenkins:/home/jenkins/.jenkins
+
+  socatdockersock:
+    image: bobrik/socat:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock
+
+  nexus:
+    image: sonatype/nexus3:3.5.0
+    volumes:
+      - ./.nexus:/nexus-data
+    ports:
+      - 8088:8081
+      - 20000:20000
+    links:
+      - jenkins0
+
+  bitbucket:
+    image: atlassian/bitbucket-server:5.2
+    ports:
+      - 7999:7999
+      - 7990:7990
+    volumes:
+      - ./.bitbucket:/var/atlassian/application-data/bitbucket
+
+  sonar:
+    image: sonarqube:6.4-alpine
+    ports:
+      - 9000:9000
+      - 9092:9092
+    volumes:
+      - ./.sonarqube_new/conf:/opt/sonarqube/conf
+      - ./.sonarqube_new/data:/opt/sonarqube/data
+      - ./.sonarqube_new/extensions:/opt/sonarqube/extensions
+      - ./.sonarqube_new/plugins:/opt/sonarqube/lib/bundled-plugins
