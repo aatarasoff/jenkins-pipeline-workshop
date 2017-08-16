@@ -1,3 +1,4 @@
 /.jenkins-backup/
 /.jenkins-workspace/
 **/*.log
+*.DS_Store
